@@ -6,6 +6,9 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
 {
     public class MatchService
     {
+        private const int RIGHT_DIRECTION_INDEX = 0;
+        private const int LEFT_DIRECTION_INDEX = 2;
+
         private readonly Direction[] directions = new[]
         {
             Direction.Right,
@@ -25,7 +28,7 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
         
         public void Init()
         {
-            _matchRepository.CurrentDirectionIndex = 0;
+            _matchRepository.CurrentDirectionIndex = -1;
             _matchRepository.CurrentIteration = 0;
             _matchRepository.Board = null;
         }
@@ -33,6 +36,7 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
         public Hubsson.Hackathon.Arcade.Client.Dotnet.Domain.Action Update(ClientGameState gameState)
         {
             InitializeBoardIfNeed(gameState.width, gameState.height);
+            InitializeDirectionIndexIfNeed(gameState);
             UpdateBoard(gameState);
             var direction = GetNextDirection(gameState);
             return new Domain.Action
@@ -44,11 +48,28 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
 
         private void InitializeBoardIfNeed(int width, int height)
         {
+            // clean board
             if (_matchRepository.Board == null)
             {
                 _matchRepository.Board = new bool[height][];
                 for (var i = 0; i < _matchRepository.Board.Length; i++)
                     _matchRepository.Board[i] = new bool[width];
+            }
+        }
+
+        private void InitializeDirectionIndexIfNeed(ClientGameState gameState)
+        {
+            if (_matchRepository.CurrentDirectionIndex == -1)
+            {
+                var ourCoordinates = GetOurPlayerCoordinates(gameState);
+                if (ourCoordinates.x < gameState.width / 2)
+                {
+                    _matchRepository.CurrentDirectionIndex = RIGHT_DIRECTION_INDEX;
+                }
+                else
+                {
+                    _matchRepository.CurrentDirectionIndex = LEFT_DIRECTION_INDEX;
+                }
             }
         }
 
@@ -71,8 +92,8 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
 
         private bool IsThereObstacle(ClientGameState gameState)
         {
-            var our = gameState.players.First(p => p.playerId == _arcadeSettings.TeamId).coordinates.Last();
-            var nextPossibleCoordinate = GetNextPossibleCoordinate(our);
+            var ourCoordinates = GetOurPlayerCoordinates(gameState);
+            var nextPossibleCoordinate = GetNextPossibleCoordinate(ourCoordinates);
             return nextPossibleCoordinate.x < 0 || 
                 nextPossibleCoordinate.y < 0 ||
                 nextPossibleCoordinate.x >= gameState.width ||
@@ -93,9 +114,14 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
             return (0, 0);
         }
 
+        private Coordinate GetOurPlayerCoordinates(ClientGameState gameState)
+        {
+            return gameState.players.First(p => p.playerId == _arcadeSettings.TeamId).coordinates.Last();
+        }
+
         private class MatchRepository
         {
-            public int CurrentDirectionIndex { get; set; } = 0;
+            public int CurrentDirectionIndex { get; set; } = -1;
 
             public int CurrentIteration { get; set; } = 0;
 
