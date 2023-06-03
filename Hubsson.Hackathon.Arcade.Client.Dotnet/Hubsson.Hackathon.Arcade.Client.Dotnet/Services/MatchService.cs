@@ -75,17 +75,15 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
                 _matchRepository.Board[nextPossibleCoordinate.y][nextPossibleCoordinate.x];
         }
 
-        private Coordinate GetNextPossibleCoordinate(Coordinate our)
+        private (int x, int y) GetNextPossibleCoordinate(Coordinate our)
         {
             if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Right)
-                return new Coordinate { x = our.x + 1, y = our.y };
+                return (our.x + 1, our.y);
             if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Left)
-                return new Coordinate { x = our.x - 1, y = our.y };
+                return (our.x - 1, our.y);
             if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Down)
-                return new Coordinate { x = our.x, y = our.y + 1 };
-            if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Up)
-                return new Coordinate { x = our.x, y = our.y - 1 };
-            return null;
+                return (our.x, our.y + 1);
+            return (our.x, our.y - 1);
         }
 
         private class MatchRepository
