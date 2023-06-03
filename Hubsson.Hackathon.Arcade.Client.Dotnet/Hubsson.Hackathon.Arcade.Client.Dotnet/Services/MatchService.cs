@@ -23,7 +23,12 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
             _arcadeSettings = settings;
         }
         
-        public void Init() { }
+        public void Init()
+        {
+            _matchRepository.CurrentDirectionIndex = 0;
+            _matchRepository.CurrentIteration = 0;
+            _matchRepository.Board = null;
+        }
 
         public Hubsson.Hackathon.Arcade.Client.Dotnet.Domain.Action Update(ClientGameState gameState)
         {
@@ -83,7 +88,9 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
                 return (our.x - 1, our.y);
             if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Down)
                 return (our.x, our.y + 1);
-            return (our.x, our.y - 1);
+            if (directions[_matchRepository.CurrentDirectionIndex] == Direction.Up)
+                return (our.x, our.y - 1);
+            return (0, 0);
         }
 
         private class MatchRepository
