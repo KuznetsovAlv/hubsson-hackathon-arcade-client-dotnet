@@ -6,7 +6,7 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
 {
     public class MatchService
     {
-        private Direction[] directions = new[]
+        private readonly Direction[] directions = new[]
         {
             Direction.Right,
             Direction.Down,
@@ -23,16 +23,12 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
             _arcadeSettings = settings;
         }
         
-        public void Init()
-        {
-            
-        }
+        public void Init() { }
 
         public Hubsson.Hackathon.Arcade.Client.Dotnet.Domain.Action Update(ClientGameState gameState)
         {
             InitializeBoardIfNeed(gameState.width, gameState.height);
             UpdateBoard(gameState);
-            //PrintBoard();
             var direction = GetNextDirection(gameState);
             return new Domain.Action
             {
@@ -47,9 +43,7 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
             {
                 _matchRepository.Board = new bool[height][];
                 for (var i = 0; i < _matchRepository.Board.Length; i++)
-                {
                     _matchRepository.Board[i] = new bool[width];
-                }
             }
         }
 
@@ -60,18 +54,6 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
                 var lastCoordinate = player.coordinates.LastOrDefault();
                 if (lastCoordinate != null)
                     _matchRepository.Board[lastCoordinate.y][lastCoordinate.x] = true;
-            }
-        }
-
-        public void PrintBoard()
-        {
-            for (var i = 0; i < _matchRepository.Board.Length; i++)
-            {
-                for (var j = 0; j < _matchRepository.Board[i].Length; j++)
-                {
-                    Console.Write(_matchRepository.Board[i][j] ? 'X' : ' ');
-                }
-                Console.WriteLine();
             }
         }
 
@@ -109,7 +91,9 @@ namespace Hubsson.Hackathon.Arcade.Client.Dotnet.Services
         private class MatchRepository
         {
             public int CurrentDirectionIndex { get; set; } = 0;
+
             public int CurrentIteration { get; set; } = 0;
+
             public bool[][] Board { get; set; }
         }
     }
